@@ -1,0 +1,116 @@
+// Everything a visitor can read lives here. Edit freely — the world reads it on load.
+// `building` must match a building id in world.js.
+
+export const SITE = 'https://happylidesign.com';
+
+const placeholder = [
+  { h: 'The problem', p: 'Paste your problem statement here.' },
+  { h: 'My role', p: 'Paste your role, team and timeline here.' },
+  { h: 'Process', p: 'Paste research, ideation and iteration highlights here.' },
+  { h: 'Outcome', p: 'Paste impact, metrics and learnings here.' },
+];
+
+export const LOCATIONS = [
+  {
+    id: 'about',
+    building: 'home',
+    label: 'Home',
+    icon: '🏠',
+    tint: ['#ffb199', '#ff7a8a'],
+    title: 'Hi, I’m Happy :)',
+    tags: ['PRODUCT DESIGNER', 'CORNELL INFO SCI'],
+    summary:
+      'Product designer who uses empathy to bring positivity to users and solve real-world problems. I focus on thoughtful AI experiences for complex workflows and thrive in ambiguous problem spaces.',
+    sections: [
+      { h: 'Background', p: 'Information Science (UX concentration) at Cornell University.' },
+      { h: 'Off the clock', p: 'Art, design chats, and my cats — say hi to them outside. 🐱🐱🐱' },
+    ],
+    link: { text: 'More about me', href: `${SITE}/about` },
+  },
+  {
+    id: 'splunk',
+    building: 'tower',
+    label: 'Splunk',
+    icon: '🔧',
+    tint: ['#7ee0ff', '#3c7bff'],
+    title: 'Splunk Contextual AI Orchestration',
+    tags: ['B2B SAAS', 'AI AGENT'],
+    summary: 'An AI agent that shows users how it reaches its results — not just the results.',
+    sections: placeholder,
+    link: { text: 'Read full case study', href: `${SITE}/splunk` },
+  },
+  {
+    id: 'sap',
+    building: 'lab',
+    label: 'SAP Lab',
+    icon: '💡',
+    tint: ['#d7c2ff', '#8a63ff'],
+    title: 'SAP Innovation Lab Onboarding',
+    tags: ['WEB', 'B2B'],
+    summary: 'A B2B onboarding flow that lets users sign securely while meeting legal requirements.',
+    sections: placeholder,
+    link: { text: 'Visit portfolio', href: SITE },
+  },
+  {
+    id: 'bloomberg',
+    building: 'radio',
+    label: 'Bloomberg',
+    icon: '📰',
+    tint: ['#ffe27a', '#ff9f3d'],
+    title: 'Bloomberg News on the Move',
+    tags: ['MOBILE', 'GEN AI', 'A11Y'],
+    summary: 'A voice-command news app for staying informed on the go.',
+    sections: placeholder,
+    link: { text: 'Read full case study', href: `${SITE}/bloomberg` },
+  },
+  {
+    id: 'wiley',
+    building: 'library',
+    label: 'Wiley',
+    icon: '📖',
+    tint: ['#b6f0c8', '#33b37a'],
+    title: 'Wiley Enterprise Management Tool',
+    tags: ['WEB', 'B2B'],
+    summary: 'A tool that helps editors manage complex publications.',
+    sections: placeholder,
+    link: { text: 'Read full case study', href: `${SITE}/wiley` },
+  },
+  {
+    id: 'viggle',
+    building: 'cafe',
+    label: 'Viggle Café',
+    icon: '🤖',
+    tint: ['#ffc4dc', '#ff5fa2'],
+    title: 'Viggle AI Character Chatbot',
+    tags: ['MOBILE', 'B2C', 'GEN AI'],
+    summary: 'A 0→1 AI character chatbot offering companionship to Gen Z.',
+    sections: placeholder,
+    link: { text: 'Read full case study', href: `${SITE}/humanice` },
+  },
+  {
+    id: 'gallery',
+    building: 'museum',
+    label: 'Gallery',
+    icon: '🖼️',
+    tint: ['#fff3e3', '#d9b38c'],
+    title: 'Art Gallery',
+    tags: ['ART', 'PLAY'],
+    summary: 'Illustrations and visual explorations outside of product work.',
+    sections: [{ h: 'Coming soon', p: 'Your artwork will hang on these walls.' }],
+    link: { text: 'Open gallery', href: `${SITE}/gallery` },
+  },
+  {
+    id: 'contact',
+    building: 'mailbox',
+    label: 'Mailbox',
+    icon: '✉️',
+    tint: ['#9ec5ff', '#4a74c9'],
+    title: 'Let’s chat!',
+    tags: ['RESUME', 'CONTACT'],
+    summary: 'Always happy to talk about design, art, and cats.',
+    sections: [{ h: 'Email', p: 'yl3262@cornell.edu' }],
+    link: { text: 'Send an email', href: 'mailto:yl3262@cornell.edu' },
+  },
+];
+
+export const PROJECT_IDS = ['splunk', 'sap', 'bloomberg', 'wiley', 'viggle'];
