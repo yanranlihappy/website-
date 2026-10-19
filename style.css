@@ -17,6 +17,7 @@ button { font: inherit; color: inherit; }
 #ui { position: fixed; inset: 0; pointer-events: none; }
 #ui > * { pointer-events: auto; }
 #ui > .labels { pointer-events: none; }
+.attract #ui { display: none; }
 
 /* ---------- map labels ---------- */
 .label {

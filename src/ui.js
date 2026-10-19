@@ -1,4 +1,4 @@
-import { LOCATIONS, PROJECT_IDS, SITE } from './content.js';
+import { LOCATIONS, PROJECT_IDS } from './content.js';
 
 const byId = Object.fromEntries(LOCATIONS.map((l) => [l.id, l]));
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -26,8 +26,8 @@ export function createUI({ onTravel, onView, onSheetChange }) {
       <button class="app" data-go="gallery" aria-label="Gallery">${iconTile(byId.gallery)}<span class="tip">Gallery</span></button>
       <button class="app" data-go="contact" aria-label="Contact">${iconTile(byId.contact)}<span class="tip">Contact</span></button>
       <span class="dock-sep"></span>
-      <a class="app" href="${SITE}" target="_blank" rel="noopener" aria-label="Classic site">
-        <span class="tile" style="--a:#ffffff;--b:#e9e4f2" aria-hidden="true">🧭</span><span class="tip">Classic site</span></a>
+      <a class="app" href="index.html" aria-label="Back to the home page">
+        <span class="tile" style="--a:#ffffff;--b:#e9e4f2" aria-hidden="true">🎮</span><span class="tip">Home page</span></a>
     </nav>
     <div class="sheet-backdrop"></div>
     <section class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden>

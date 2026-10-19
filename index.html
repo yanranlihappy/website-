@@ -3,17 +3,194 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Happy Li — Product Designer</title>
-    <meta name="description" content="Walk around Happy Li’s town to explore design case studies." />
+    <title>Happy Li Design</title>
+    <meta name="claude:viewport-fit-sides" content="cover" />
+    <meta name="description" content="Happy Li is a product designer. Press start to explore her work as a little pixel town." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@1,800;1,900&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Silkscreen&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="landing.css" />
   </head>
   <body>
-    <canvas id="scene" aria-label="Happy Li’s town. Use the Dock below to navigate without walking."></canvas>
-    <div id="ui"></div>
-    <noscript><p class="noscript">This portfolio needs JavaScript. Visit <a href="https://happylidesign.com">happylidesign.com</a>.</p></noscript>
-    <script type="module" src="src/main.js"></script>
+    <header class="top">
+      <a class="mark" href="#top">Happy Li</a>
+      <nav aria-label="Main">
+        <a href="#work">Work</a>
+        <a href="#about">About</a>
+        <a href="https://happylidesign.com/gallery" target="_blank" rel="noopener">Gallery</a>
+        <a href="https://happylidesign.com" target="_blank" rel="noopener">Resume</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="headline">
+        <div class="stage">
+          <div class="device" id="device" style="--shell: #cdb8e6; --on: #2c2633">
+            <div class="power" aria-hidden="true"><span>OFF</span><i></i><span>ON</span></div>
+            <div class="bezel">
+              <span class="led" aria-hidden="true"></span>
+              <span class="battery" aria-hidden="true">BATTERY</span>
+              <div class="screen">
+                <img class="screen-still" src="assets/town-preview.jpg" alt="" />
+                <iframe class="screen-live" title="Preview of Happy’s Town" src="play.html#attract" tabindex="-1" aria-hidden="true" loading="lazy"></iframe>
+                <button class="screen-start" id="start" type="button" aria-label="Play Happy’s Town">
+                  <span class="title-card">
+                    <span class="title-small">welcome to</span>
+                    <span class="title-big">Happy’s<br />Town</span>
+                  </span>
+                  <span class="blink">TAP TO PLAY</span>
+                  <span class="fine">© 2026 HAPPY LI</span>
+                </button>
+                <div class="boot" aria-hidden="true"><span>happy li</span></div>
+              </div>
+              <p class="bezel-label" aria-hidden="true"><b>HAPPY LI</b> <span>pocket</span></p>
+            </div>
+            <span class="brand" aria-hidden="true">happy&nbsp;li</span>
+            <div class="dpad" aria-hidden="true"><i class="h"></i><i class="v"></i><i class="dot"></i></div>
+            <button class="round b" type="button" data-act="prev" aria-label="Previous shell color"><span>B</span></button>
+            <button class="round a" type="button" data-act="play" aria-label="Play"><span>A</span></button>
+            <button class="pill select" type="button" data-act="next" aria-label="Next shell color"><span>SELECT</span></button>
+            <button class="pill start" type="button" data-act="play" aria-label="Start"><span>START</span></button>
+            <span class="speaker" aria-hidden="true"></span>
+          </div>
+        </div>
+
+        <h1 class="headline" id="headline">Design in color.</h1>
+        <p class="wordmark" aria-label="Happy Li Design">
+          <span class="wm-ink">HAPPY LI</span>
+          <span class="wm-color"><span>D</span><span>E</span><span>S</span><span>I</span><span>G</span><span>N</span></span>
+        </p>
+        <p class="kicker">Product designer.</p>
+
+        <div class="shells" role="radiogroup" aria-label="Shell color">
+          <button role="radio" data-shell="lilac" aria-label="Lilac"></button>
+          <button role="radio" data-shell="berry" aria-label="Berry"></button>
+          <button role="radio" data-shell="teal" aria-label="Teal"></button>
+          <button role="radio" data-shell="kiwi" aria-label="Kiwi"></button>
+          <button role="radio" data-shell="dandelion" aria-label="Dandelion"></button>
+          <button role="radio" data-shell="grape" aria-label="Grape"></button>
+          <button role="radio" data-shell="atomic" aria-label="Atomic purple"></button>
+        </div>
+        <p class="shell-name" aria-live="polite"><span id="shell-name">Lilac</span> · press SELECT to change</p>
+      </section>
+
+      <section class="intro wrap" aria-label="Introduction">
+        <p>
+          I use empathy to bring positivity to users and solve real-world problems. I focus on thoughtful AI experiences
+          for complex workflows, and I do my best work in ambiguous problem spaces.
+        </p>
+      </section>
+
+      <section class="work wrap" id="work" aria-labelledby="work-title">
+        <div class="section-head">
+          <h2 id="work-title">Work</h2>
+          <p>Each cartridge is also a building in town.</p>
+        </div>
+        <ul class="carts">
+          <li class="cart" style="--label: #3c7bff; --label-2: #7ee0ff">
+            <span class="cart-ridges" aria-hidden="true"></span>
+            <div class="cart-label">
+              <span class="cart-tags">B2B SAAS · AI AGENT</span>
+              <h3>Splunk Contextual AI Orchestration</h3>
+              <p>An AI agent that shows users how it reaches its results, not just the results.</p>
+            </div>
+            <div class="cart-links">
+              <a href="https://happylidesign.com/splunk" target="_blank" rel="noopener">Read case study</a>
+              <a href="play.html#splunk">Visit the data center</a>
+            </div>
+          </li>
+          <li class="cart" style="--label: #8a63ff; --label-2: #d7c2ff">
+            <span class="cart-ridges" aria-hidden="true"></span>
+            <div class="cart-label">
+              <span class="cart-tags">WEB · B2B</span>
+              <h3>SAP Innovation Lab Onboarding</h3>
+              <p>An onboarding flow that lets users sign securely while meeting legal requirements.</p>
+            </div>
+            <div class="cart-links">
+              <a href="https://happylidesign.com" target="_blank" rel="noopener">Read case study</a>
+              <a href="play.html#sap">Visit the lab</a>
+            </div>
+          </li>
+          <li class="cart" style="--label: #ff9f3d; --label-2: #ffe27a">
+            <span class="cart-ridges" aria-hidden="true"></span>
+            <div class="cart-label">
+              <span class="cart-tags">MOBILE · GEN AI · A11Y</span>
+              <h3>Bloomberg News on the Move</h3>
+              <p>A voice-command news app for staying informed on the go.</p>
+            </div>
+            <div class="cart-links">
+              <a href="https://happylidesign.com/bloomberg" target="_blank" rel="noopener">Read case study</a>
+              <a href="play.html#bloomberg">Visit the newsroom</a>
+            </div>
+          </li>
+          <li class="cart" style="--label: #33b37a; --label-2: #b6f0c8">
+            <span class="cart-ridges" aria-hidden="true"></span>
+            <div class="cart-label">
+              <span class="cart-tags">WEB · B2B</span>
+              <h3>Wiley Enterprise Management Tool</h3>
+              <p>A tool that helps editors manage complex publications.</p>
+            </div>
+            <div class="cart-links">
+              <a href="https://happylidesign.com/wiley" target="_blank" rel="noopener">Read case study</a>
+              <a href="play.html#wiley">Visit the library</a>
+            </div>
+          </li>
+          <li class="cart" style="--label: #ff5fa2; --label-2: #ffc4dc">
+            <span class="cart-ridges" aria-hidden="true"></span>
+            <div class="cart-label">
+              <span class="cart-tags">MOBILE · B2C · GEN AI</span>
+              <h3>Viggle AI Character Chatbot</h3>
+              <p>A 0→1 chatbot offering companionship to Gen Z.</p>
+            </div>
+            <div class="cart-links">
+              <a href="https://happylidesign.com/humanice" target="_blank" rel="noopener">Read case study</a>
+              <a href="play.html#viggle">Visit the cat café</a>
+            </div>
+          </li>
+          <li class="cart cart-more" style="--label: #16141b; --label-2: #e9e4f2">
+            <span class="cart-ridges" aria-hidden="true"></span>
+            <div class="cart-label">
+              <span class="cart-tags">ONLY IN TOWN</span>
+              <h3>TikTok, Klook, Cornell Go &amp; Catacombs</h3>
+              <p>Four more projects live on the street: a creator studio, a travel agency, a bear workshop and an Egyptian arcade.</p>
+            </div>
+            <div class="cart-links">
+              <a href="play.html">Press start</a>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <section class="about wrap" id="about" aria-labelledby="about-title">
+        <h2 id="about-title">About</h2>
+        <div class="about-grid">
+          <p class="about-lede">
+            Hi, I’m Happy. I studied Information Science with a UX concentration at Cornell University.
+          </p>
+          <dl class="facts">
+            <div><dt>Focus</dt><dd>AI experiences for complex workflows</dd></div>
+            <div><dt>Studied</dt><dd>Cornell University, Information Science (UX)</dd></div>
+            <div><dt>Off the clock</dt><dd>Art, design chats, and my cats</dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <section class="contact wrap" id="contact" aria-labelledby="contact-title">
+        <h2 id="contact-title">Let’s chat!</h2>
+        <p>I’m always happy to talk about design, art, and my cats.</p>
+        <div class="email-row">
+          <a class="email" href="mailto:yl3262@cornell.edu">yl3262@cornell.edu</a>
+          <button class="copy" type="button" id="copy-email">Copy</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="foot wrap">
+      <span>© 2026 Happy Li</span>
+      <span>Made like a little game.</span>
+    </footer>
+
+    <div class="zoom-veil" aria-hidden="true"></div>
+    <script src="landing.js"></script>
   </body>
 </html>

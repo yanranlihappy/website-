@@ -6,6 +6,9 @@ import { createUI } from './ui.js';
 THREE.ColorManagement.enabled = false;
 
 const params = new URLSearchParams(location.search);
+// Attract mode: the self-playing preview shown on the landing page's Game Boy screen.
+const attract = params.has('attract') || location.hash === '#attract';
+if (attract) document.documentElement.classList.add('attract');
 // Shareable state lives in the query string (?view=iso&open=splunk). Some hosts refuse URL changes.
 const replaceUrl = () => {
   try {
@@ -147,7 +150,7 @@ function updateCamera(dt) {
 // ---------- input ----------
 const keys = new Set();
 addEventListener('keydown', (e) => {
-  if (e.target.closest?.('input, textarea')) return;
+  if (attract || e.target.closest?.('input, textarea')) return;
   const k = e.key.toLowerCase();
   if (k === 'escape') return ui.close();
   if (ui.isOpen()) return;
@@ -172,7 +175,7 @@ marker.visible = false;
 scene.add(marker);
 
 canvas.addEventListener('pointerdown', (e) => {
-  if (ui.isOpen()) return;
+  if (attract || ui.isOpen()) return;
   const ndc = new THREE.Vector2((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
   raycaster.setFromCamera(ndc, camera);
   const hit = raycaster.intersectObjects(world.clickables, false)[0];
@@ -247,12 +250,18 @@ function travelTo(id, open = false) {
 }
 
 const SPEED = 7.5;
+const ATTRACT_STOPS = [[44, 0, 0.8], [-12, 0, 0.8]];
+let attractStop = -1;
 function updatePlayer(dt) {
   let mx = 0;
   let mz = 0;
   const { yaw } = view();
   const fwd = { x: -Math.sin(yaw), z: -Math.cos(yaw) };
   const rgt = { x: Math.cos(yaw), z: -Math.sin(yaw) };
+  if (attract && !path.length) {
+    attractStop = (attractStop + 1) % ATTRACT_STOPS.length;
+    path = [new THREE.Vector3(...ATTRACT_STOPS[attractStop])];
+  }
   if (!ui.isOpen()) {
     const f = (keys.has('w') || keys.has('arrowup') ? 1 : 0) - (keys.has('s') || keys.has('arrowdown') ? 1 : 0);
     const r = (keys.has('d') || keys.has('arrowright') ? 1 : 0) - (keys.has('a') || keys.has('arrowleft') ? 1 : 0);
@@ -339,8 +348,14 @@ function frame() {
 updateCamera(1);
 frame();
 
-if (params.get('open') && ui.byId[params.get('open')]) {
-  const id = params.get('open');
+// ?open=splunk or #splunk opens a case study on arrival
+const hashId = location.hash.slice(1);
+const openId = params.get('open') ?? hashId;
+if (attract) {
+  player.position.set(-12, 0, 0.8);
+  camTarget.copy(player.position);
+} else if (ui.byId[openId]) {
+  const id = openId;
   const dest = world.buildings[ui.byId[id].building];
   player.position.copy(dest.inside ?? dest.door);
   camTarget.copy(player.position);
