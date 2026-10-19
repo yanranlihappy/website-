@@ -72,6 +72,56 @@ function flat(parent, w, d, color, x, z, y = 0.01, emissive = 0) {
   return m;
 }
 
+// Storefront signs: text drawn to a canvas, then pixelated by the low-res render like everything else.
+const SERIF = 'Georgia, "Times New Roman", serif';
+const SANS = 'Inter, "Helvetica Neue", Arial, sans-serif';
+const SIGNS = {
+  home: { text: 'Happy’s', font: `italic 700 {px} ${SERIF}`, band: 0xc7655a },
+  tiktok: { text: 'TikTok', font: `800 {px} ${SANS}`, band: 0x15121f, glitch: true },
+  splunk: { text: 'splunk>', font: `700 {px} ${SANS}`, band: 0x232a36 },
+  sap: { text: 'SAP Labs', font: `800 {px} ${SANS}`, band: 0x2f6fd8 },
+  wiley: { text: 'WILEY', font: `700 {px} ${SERIF}`, band: 0x2f6b4a },
+  bloomberg: { text: 'Bloomberg', font: `700 {px} ${SANS}`, band: 0x111111 },
+  klook: { text: 'klook', font: `800 {px} ${SANS}`, band: 0xff5b00 },
+  cornellgo: { text: 'Cornell Go', font: `700 {px} ${SERIF}`, band: 0x7a1010 },
+  catacombs: { text: 'CATACOMBS', font: `700 {px} ${SERIF}`, band: 0x3a2a1a, fg: '#ffd25e' },
+  viggle: { text: 'viggle', font: `800 {px} ${SANS}`, band: 0xd85a8c },
+  gallery: { text: 'GALLERY', font: `700 {px} ${SERIF}`, band: 0xb08860 },
+};
+const signDrawers = [];
+function signMesh(sign, w, h) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = Math.round((512 * h) / w);
+  const tex = new THREE.CanvasTexture(canvas);
+  const draw = () => {
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let px = Math.round(canvas.height * 0.72);
+    const font = () => sign.font.replace('{px}', `${px}px`);
+    ctx.font = font();
+    while (ctx.measureText(sign.text).width > canvas.width * 0.92 && px > 8) ctx.font = font(--px);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2 + px * 0.04;
+    if (sign.glitch) {
+      ctx.fillStyle = '#25f4ee';
+      ctx.fillText(sign.text, cx - 5, cy - 3);
+      ctx.fillStyle = '#fe2c55';
+      ctx.fillText(sign.text, cx + 5, cy + 3);
+    }
+    ctx.fillStyle = sign.fg ?? '#ffffff';
+    ctx.fillText(sign.text, cx, cy);
+    tex.needsUpdate = true;
+  };
+  draw();
+  signDrawers.push(draw);
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tex, transparent: true }));
+  return m;
+}
+document.fonts?.ready.then(() => signDrawers.forEach((d) => d()));
+
 // Deterministic randomness so the world looks the same on every visit.
 function rng(seed) {
   return () => {
@@ -200,6 +250,17 @@ export function buildWorld(scene) {
         const wz = -d / 2 + (d / sc) * (c + 0.5);
         for (const sx of [-1, 1]) box(facade, 0.1, 1.2, 1.1, C.window, sx * (w / 2 + 0.05), y, wz, { emissive: 0x2a5a66, shadow: false });
       }
+    }
+
+    // storefront sign on the side the angled cameras look at (+z)
+    const sign = SIGNS[id];
+    if (sign) {
+      const bandH = 1.3;
+      const y = h - bandH - 0.2;
+      box(facade, w + 0.02, bandH, 0.1, sign.band, 0, y, d / 2 + 0.05, { shadow: false });
+      const m = signMesh(sign, Math.min(w - 1, 7), bandH * 0.85);
+      m.position.set(0, y + bandH / 2, d / 2 + 0.11);
+      facade.add(m);
     }
 
     // roof with parapet and a few details for the top-down view
@@ -911,6 +972,31 @@ export function buildWorld(scene) {
     makeCat(root, 0xf29a4a, 4, 3.8),
   ];
 
+  // ---------- pedestrians strolling the sidewalks ----------
+  const outfits = [
+    [0x8a2a3a, 0x2b2430, 0x5a3a2a],
+    [0x4a7a3a, 0x3b3328, 0xd9b38c],
+    [0x3c7bff, 0xf3efe6, 0x231a24],
+    [0xffd25e, 0x34406e, 0x8a5a3c],
+    [0xf3efe6, 0x5b4a8a, 0x231a24],
+    [0x33b37a, 0x2b2430, 0xc9a061],
+  ];
+  const peds = outfits.map(([shirt, pants, hair], i) => {
+    const g = makeCharacter({ shirt, pants, hair, skin: [0xf3c9a6, 0xc68a62, 0x8a5a3c][i % 3] });
+    g.scale.setScalar(1.1);
+    g.position.set(-18 + r() * 90, 0, i % 2 ? 3.5 : -3.5);
+    root.add(g);
+    return { g, dir: r() < 0.5 ? 1 : -1, speed: 1.4 + r() * 0.9 };
+  });
+  animated.push((t, dt) => {
+    for (const p of peds) {
+      p.g.position.x += p.dir * p.speed * dt;
+      if (p.g.position.x > 74 || p.g.position.x < -20) p.dir *= -1;
+      p.g.rotation.y = (p.dir * Math.PI) / 2;
+      p.g.userData.animate(dt * (p.speed / 2.2), true);
+    }
+  });
+
   const isBlocked = (x, z, rad) =>
     x < -29 || x > 90 || z < -26 || z > 26 ||
     colliders.some((c) => x + rad > c.minX && x - rad < c.maxX && z + rad > c.minZ && z - rad < c.maxZ);
@@ -920,12 +1006,19 @@ export function buildWorld(scene) {
   const zoneOf = (p, margin) =>
     walkIns.find((b) => Math.abs(p.x - b.x) < b.w / 2 + margin && Math.abs(p.z - b.z) < b.d / 2 + margin);
 
-  function update(t, dt, playerPos) {
+  // full-height boxes for checking whether a building stands between the camera and the player
+  for (const b of walkIns) b.bounds = new THREE.Box3(new THREE.Vector3(b.x - b.w / 2, 0, b.z - b.d / 2), new THREE.Vector3(b.x + b.w / 2, b.h + 0.4, b.z + b.d / 2));
+  const ray = new THREE.Ray();
+  let open = null;
+
+  function update(t, dt, playerPos, toCamera) {
     animated.forEach((fn) => fn(t, dt));
     cats.forEach((cat) => updateCat(cat, t, dt, isBlocked));
-    const open = zoneOf(playerPos, 2.2);
+    open = zoneOf(playerPos, 2.2);
+    ray.origin.set(playerPos.x, 1.2, playerPos.z);
+    ray.direction.copy(toCamera);
     for (const b of walkIns) {
-      const goal = b === open ? 1 : 0;
+      const goal = b === open || ray.intersectsBox(b.bounds) ? 1 : 0;
       b.reveal += (goal - b.reveal) * Math.min(1, dt * 7);
       if (Math.abs(goal - b.reveal) < 0.002) b.reveal = goal;
       b.walls.scale.y = 1 - (1 - STUB) * b.reveal;
@@ -944,7 +1037,7 @@ export function buildWorld(scene) {
     isBlocked,
     zoneOf: (p) => zoneOf(p, 1.6)?.id ?? null,
     // 0..1, how far the nearest building is cut away (used to zoom in on interiors)
-    focus: () => walkIns.reduce((m, b) => Math.max(m, b.reveal), 0),
+    focus: () => open?.reveal ?? 0,
     spawn: buildings.home.inside.clone(),
   };
 }

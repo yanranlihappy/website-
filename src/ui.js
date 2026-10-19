@@ -10,8 +10,9 @@ export function createUI({ onTravel, onView, onSheetChange }) {
   root.innerHTML = `
     <div class="labels" aria-hidden="true"></div>
     <div class="view-switch" role="group" aria-label="Camera view">
-      <button data-view="topdown">Top-down</button>
+      <button data-view="front">3/4</button>
       <button data-view="iso">Isometric</button>
+      <button data-view="topdown">Top-down</button>
     </div>
     <button class="island" aria-live="polite">
       <span class="island-compact"><span class="island-dot"></span></span>

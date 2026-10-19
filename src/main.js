@@ -39,31 +39,27 @@ const ring = new THREE.Mesh(new THREE.RingGeometry(0.55, 0.75, 20), new THREE.Me
 ring.rotation.x = -Math.PI / 2;
 scene.add(ring);
 
-// ---------- camera: one orthographic camera, two views ----------
-// Top-down looks straight down (like the screenshot); isometric matches the reference site.
+// ---------- camera: one orthographic camera, three views ----------
+// 3/4 looks north at an angle so storefronts face you; isometric matches the reference site;
+// top-down looks straight down. `mode` picks the color grade: 0 = sunset, 1 = clean.
 const VIEWS = {
-  topdown: { pitch: Math.PI / 2, yaw: 0, height: 24, mode: 0 },
+  front: { pitch: 0.6, yaw: 0, height: 21, mode: 0.7 },
   iso: { pitch: Math.atan(1 / Math.SQRT2), yaw: Math.PI / 4, height: 30, mode: 1 },
+  topdown: { pitch: Math.PI / 2, yaw: 0, height: 24, mode: 0 },
 };
-let viewName = params.get('view') === 'topdown' ? 'topdown' : 'iso';
-let blend = VIEWS[viewName].mode; // 0 = top-down, 1 = iso
+const VIEW_ORDER = ['front', 'iso', 'topdown'];
+let viewName = VIEWS[params.get('view')] ? params.get('view') : 'front';
+const cur = { ...VIEWS[viewName] };
 const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 500);
 const camTarget = player.position.clone();
 const lerp = (a, b, t) => a + (b - a) * t;
 const ease = (t) => t * t * (3 - 2 * t);
-const view = () => {
-  const e = ease(blend);
-  return {
-    pitch: lerp(VIEWS.topdown.pitch, VIEWS.iso.pitch, e),
-    yaw: lerp(VIEWS.topdown.yaw, VIEWS.iso.yaw, e),
-    height: lerp(VIEWS.topdown.height, VIEWS.iso.height, e),
-  };
-};
+const view = () => cur;
 
 // ---------- pixel pipeline: render small, upscale with nearest, then grade ----------
 const rt = new THREE.WebGLRenderTarget(1, 1, { minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter });
 const post = new THREE.ShaderMaterial({
-  uniforms: { tDiffuse: { value: rt.texture }, uRes: { value: new THREE.Vector2() }, uTime: { value: 0 }, uMode: { value: blend } },
+  uniforms: { tDiffuse: { value: rt.texture }, uRes: { value: new THREE.Vector2() }, uTime: { value: 0 }, uMode: { value: cur.mode } },
   vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
   fragmentShader: /* glsl */ `
     uniform sampler2D tDiffuse;
@@ -115,10 +111,11 @@ addEventListener('resize', resize);
 resize();
 
 function updateCamera(dt) {
-  const goal = VIEWS[viewName].mode;
-  blend += Math.sign(goal - blend) * Math.min(Math.abs(goal - blend), dt * 1.4);
-  post.uniforms.uMode.value = ease(blend);
-  sun.shadow.intensity = lerp(0.55, 1, ease(blend)); // flatter, Hotline-style light from above
+  const goal = VIEWS[viewName];
+  const k = 1 - Math.exp(-dt * 4);
+  for (const key of ['pitch', 'yaw', 'height', 'mode']) cur[key] += (goal[key] - cur[key]) * k;
+  post.uniforms.uMode.value = cur.mode;
+  sun.shadow.intensity = lerp(0.55, 1, cur.mode); // flatter, Hotline-style light from above
   const { pitch, yaw, height } = view();
 
   camTarget.lerp(player.position, 1 - Math.exp(-dt * 6));
@@ -158,7 +155,7 @@ addEventListener('keydown', (e) => {
     if (ui.nearby()) ui.open(ui.nearby().id);
     return;
   }
-  if (k === 'v') return setView(viewName === 'iso' ? 'topdown' : 'iso');
+  if (k === 'v') return setView(VIEW_ORDER[(VIEW_ORDER.indexOf(viewName) + 1) % VIEW_ORDER.length]);
   keys.add(k);
 });
 addEventListener('keyup', (e) => keys.delete(e.key.toLowerCase()));
@@ -312,6 +309,7 @@ function updatePlayer(dt) {
 }
 
 const tmp = new THREE.Vector3();
+const toCamera = new THREE.Vector3();
 const project = (buildingId) => {
   const b = world.buildings[buildingId];
   tmp.copy(b.anchor).project(camera);
@@ -325,7 +323,7 @@ function frame() {
   const dt = Math.min(clock.getDelta(), 0.05);
   t += dt;
   updatePlayer(dt);
-  world.update(t, dt, player.position);
+  world.update(t, dt, player.position, toCamera.setFromMatrixColumn(camera.matrixWorld, 2));
   updateCamera(dt);
   marker.scale.setScalar(1 + Math.sin(t * 6) * 0.15);
   ring.position.set(player.position.x, 0.04, player.position.z);
@@ -348,6 +346,12 @@ if (params.get('open') && ui.byId[params.get('open')]) {
   camTarget.copy(player.position);
   ui.open(id);
 } else {
+  // ?at=x,z starts the visit at a spot in town
+  const [ax, az] = (params.get('at') ?? '').split(',').map(Number);
+  if (Number.isFinite(ax) && Number.isFinite(az) && !world.isBlocked(ax, az, 0.4)) {
+    player.position.set(ax, 0, az);
+    camTarget.copy(player.position);
+  }
   setTimeout(() => ui.toast('Welcome to Happy’s town', innerWidth < 700 ? 'Tap anywhere to walk' : 'WASD or click to walk around'), 600);
 }
 document.body.classList.add('ready');

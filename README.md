@@ -2,11 +2,11 @@
 
 A walkable pixel-art town where each building is a design case study.
 
-- **Views:** switch between *Top-down* (sunset / grain look) and *Isometric* (clean dithered look) with the control in the top-left or the `V` key.
+- **Views:** *3/4* (storefront perspective, default), *Isometric*, and *Top-down*. Switch with the control in the top-left or the `V` key.
 - **Move:** WASD / arrow keys, or click/tap anywhere. Click a building to walk there.
 - **Open:** walk up to a door — the Dynamic Island pops up — then press `E` or tap it to open the case study sheet.
 - **Dock:** About, Work (all projects), Gallery, Contact, and a link to the classic site.
-- **Links:** `?view=iso` and `?open=splunk` deep-link to a view or case study.
+- **Links:** `?view=iso`, `?open=splunk` and `?at=10,1` deep-link to a view, a case study, or a spot in town.
 
 ## Edit content
 
