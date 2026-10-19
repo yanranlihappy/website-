@@ -62,6 +62,7 @@ export function createUI({ onTravel, onView, onSheetChange }) {
   // ---------- dynamic island ----------
   let nearby = null;
   let toastTimer = 0;
+  let toasting = false;
   function renderIsland(content) {
     if (!content) {
       island.classList.remove('expanded');
@@ -73,20 +74,32 @@ export function createUI({ onTravel, onView, onSheetChange }) {
   function setNearby(loc) {
     if (loc === nearby) return;
     nearby = loc;
+    if (toasting) return;
+    showNearby();
+  }
+  function showNearby() {
+    const loc = nearby;
     if (loc) {
-      clearTimeout(toastTimer);
       renderIsland(`${iconTile(loc, 'small')}<span class="island-text"><b>${esc(loc.title)}</b>
         <small>${esc(loc.tags.join(' · '))}</small></span><span class="island-open">Open</span>`);
     } else renderIsland(null);
   }
-  function toast(title, sub, ms = 4500) {
-    if (nearby) return;
+  function toast(title, sub, ms = 4000) {
+    toasting = true;
     renderIsland(`<span class="tile small" style="--a:#ffb199;--b:#ff5fa2">👋</span>
       <span class="island-text"><b>${esc(title)}</b><small>${esc(sub)}</small></span>`);
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => !nearby && renderIsland(null), ms);
+    toastTimer = setTimeout(() => {
+      toasting = false;
+      showNearby();
+    }, ms);
   }
-  island.addEventListener('click', () => nearby && open(nearby.id));
+  island.addEventListener('click', () => {
+    if (!nearby) return;
+    clearTimeout(toastTimer);
+    toasting = false;
+    open(nearby.id);
+  });
 
   // ---------- dock ----------
   root.querySelectorAll('[data-go]').forEach((b) =>

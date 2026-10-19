@@ -45,7 +45,7 @@ const VIEWS = {
   topdown: { pitch: Math.PI / 2, yaw: 0, height: 24, mode: 0 },
   iso: { pitch: Math.atan(1 / Math.SQRT2), yaw: Math.PI / 4, height: 30, mode: 1 },
 };
-let viewName = params.get('view') === 'iso' ? 'iso' : 'topdown';
+let viewName = params.get('view') === 'topdown' ? 'topdown' : 'iso';
 let blend = VIEWS[viewName].mode; // 0 = top-down, 1 = iso
 const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 500);
 const camTarget = player.position.clone();
@@ -123,7 +123,7 @@ function updateCamera(dt) {
 
   camTarget.lerp(player.position, 1 - Math.exp(-dt * 6));
   const aspect = innerWidth / innerHeight;
-  const halfH = (height * (innerWidth < 700 ? 0.8 : 1)) / 2;
+  const halfH = (height * (innerWidth < 700 ? 0.8 : 1) * (1 - 0.25 * ease(world.focus()))) / 2;
   Object.assign(camera, { left: -halfH * aspect, right: halfH * aspect, top: halfH, bottom: -halfH });
   camera.updateProjectionMatrix();
 
@@ -220,10 +220,18 @@ function segmentBlocked(a, b) {
 // Walk along the street to a location; fade-teleport if the walk would be blocked.
 function travelTo(id, open = false) {
   const loc = ui.byId[id];
-  const door = world.buildings[loc.building].door;
+  const dest = world.buildings[loc.building];
+  const door = dest.door;
+  const end = dest.inside ?? door;
   const here = player.position.clone();
-  const route = [new THREE.Vector3(here.x, 0, 0), new THREE.Vector3(door.x, 0, 0), door.clone()];
-  if (Math.abs(here.z) < 0.5) route.shift();
+  // leave the building we're in through its door, follow the street, then walk inside
+  const from = world.buildings[world.zoneOf(here)];
+  const start = from && from !== dest ? from.door.clone() : here;
+  const route = [new THREE.Vector3(start.x, 0, 0), new THREE.Vector3(door.x, 0, 0), door.clone()];
+  if (Math.abs(start.z) < 0.5) route.shift();
+  if (start !== here) route.unshift(start);
+  if (from === dest) route.length = 0;
+  if (dest.inside) route.push(end.clone());
   const pts = [here, ...route];
   const ok = pts.every((p, i) => i === 0 || !segmentBlocked(pts[i - 1], p));
   openOnArrive = open ? id : null;
@@ -233,8 +241,8 @@ function travelTo(id, open = false) {
   } else {
     path = [];
     ui.fade(() => {
-      player.position.copy(door);
-      camTarget.copy(door);
+      player.position.copy(end);
+      camTarget.copy(end);
       if (openOnArrive) ui.open(openOnArrive);
       openOnArrive = null;
     });
@@ -297,16 +305,10 @@ function updatePlayer(dt) {
   }
   player.userData.animate(dt, moving);
 
-  let near = null;
-  let best = 2.6;
-  for (const loc of Object.values(ui.byId)) {
-    const d = world.buildings[loc.building].door.distanceTo(player.position);
-    if (d < best) {
-      best = d;
-      near = loc;
-    }
-  }
-  ui.setNearby(near);
+  const zone = world.zoneOf(player.position);
+  let near = zone ? locByBuilding[zone] : null;
+  if (!near && world.buildings.mailbox.door.distanceTo(player.position) < 2.4) near = locByBuilding.mailbox;
+  ui.setNearby(near ?? null);
 }
 
 const tmp = new THREE.Vector3();
@@ -323,7 +325,7 @@ function frame() {
   const dt = Math.min(clock.getDelta(), 0.05);
   t += dt;
   updatePlayer(dt);
-  world.update(t, dt);
+  world.update(t, dt, player.position);
   updateCamera(dt);
   marker.scale.setScalar(1 + Math.sin(t * 6) * 0.15);
   ring.position.set(player.position.x, 0.04, player.position.z);
@@ -341,9 +343,9 @@ frame();
 
 if (params.get('open') && ui.byId[params.get('open')]) {
   const id = params.get('open');
-  const door = world.buildings[ui.byId[id].building].door;
-  player.position.copy(door);
-  camTarget.copy(door);
+  const dest = world.buildings[ui.byId[id].building];
+  player.position.copy(dest.inside ?? dest.door);
+  camTarget.copy(player.position);
   ui.open(id);
 } else {
   setTimeout(() => ui.toast('Welcome to Happy’s town', innerWidth < 700 ? 'Tap anywhere to walk' : 'WASD or click to walk around'), 600);
